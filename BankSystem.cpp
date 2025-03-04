@@ -27,29 +27,24 @@ class BankAccount {
         float getBalance() { return balance; }
 };
 
-enum MenuOptions {CREATE, DEPOSIT, WITHDRAW, CHECK, EXIT};
+enum MenuOptions {CREATE=1, DEPOSIT=2, WITHDRAW=3, CHECK=4, EXIT=5, INVALID=6};
 
 void displayMenu();
-int getMenuOption();
+MenuOptions getMenuOption();
 bool isAlpha(string &str);
 float stringToFloat(string &str);
 void createAccount(BankAccount* &bankAccount, string name, float balance);
-
+void invalidAccount();
+void displayBalance(BankAccount *bankAccount);
 
 int main() {
-
-    int menu_option;
     MenuOptions menuOption;
-    BankAccount* bankAccount;
+    BankAccount* bankAccount = nullptr;
     bool accountCreated = false;
     
     do {
         displayMenu();
-        menu_option = getMenuOption();
-        while(menu_option < 1 || menu_option > 5) {
-            menu_option = getMenuOption();
-        }
-        menuOption = (MenuOptions)(menu_option-1);
+        menuOption = getMenuOption();
         string name = "";
         string amount = "";
         float num = -1.0f;
@@ -93,11 +88,11 @@ int main() {
 
                     bankAccount->deposit(num);
 
-                    cout << "\n\nYour new balance is $" <<  fixed << setprecision(2) << bankAccount->getBalance() << "\n\n";
+                    displayBalance(bankAccount);
 
                 }
                 else {
-                    cout << "\n\nBank account is invalid\n\n";
+                    invalidAccount();
                 }
                 break;
             case WITHDRAW:
@@ -113,22 +108,27 @@ int main() {
 
                     bankAccount->withdraw(num);
 
-                    cout << "\n\nYour current balance is $" << fixed << setprecision(2) << bankAccount->getBalance() << "\n\n";
+                    displayBalance(bankAccount);
                 }
                 else {
-                    cout << "\n\nBank account is invalid\n\n";
+                    invalidAccount();
                 }
                 break;
             case CHECK:
                 if(bankAccount) {
-                    cout << "\n\nYour current balance is $" << fixed << setprecision(2) << bankAccount->getBalance() << "\n\n";
+                    displayBalance(bankAccount);
+                }
+                else {
+                    invalidAccount();
                 }
                 break;
             case EXIT:
                 cout << "\n\nExiting banking program...";
                 break;
+            case INVALID:
+                break;
         }
-    } while(menu_option != 5);
+    } while(menuOption != EXIT);
 
     delete bankAccount;
 
@@ -145,17 +145,24 @@ void displayMenu() {
     cout << "5. Exit" << endl;
 }
 
-int getMenuOption() {
+MenuOptions getMenuOption() {
     string option;
     cout << "\n\n Enter your choice: ";
     try {
        cin >> option;
        int input = stoi(option);
-       return input;
+       if(input >= 1 && input <= 5) {
+            return MenuOptions(input);
+       }
+       else {
+            cout << "Invalid choice, please enter a valid option (1-5)";
+            return INVALID;
+       }
 
     } catch(const invalid_argument &e) {
         cout << "Invalid choice, please enter a valid option (1-5)";
-        return 0;
+        return INVALID;
+        
     }
 }
 
@@ -187,4 +194,12 @@ float stringToFloat(string &str) {
 
 void createAccount(BankAccount* &bankAccount, string name, float balance) {
     bankAccount = new BankAccount(name, balance);
+}
+
+void invalidAccount() {
+    cout << "\n\nBank account is invalid, please create an account first\n\n";
+}
+
+void displayBalance(BankAccount *bankAccount) {
+    cout << "\n\nYour current balance is $" << fixed << setprecision(2) << bankAccount->getBalance() << "\n\n";
 }
