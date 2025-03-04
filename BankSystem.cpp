@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+#include <iomanip>
 
 using namespace std;
 
@@ -13,17 +14,26 @@ class BankAccount {
         BankAccount(string n, float b) : accountHolderName(n), balance(b) {};
         
         void deposit(double amount) { balance += amount; }
-        void withdraw(double amount) { balance -= amount; }
+        
+        void withdraw(double amount) { 
+            if(amount > balance) {
+                cout << "Error, cannot withdraw more than your account currently has";
+            }
+            else {
+                balance -= amount;
+            }
+        }
+
         float getBalance() { return balance; }
 };
 
-enum MenuOptions {CREATE, DEPOSIT, WITHDRAW, CHECK};
+enum MenuOptions {CREATE, DEPOSIT, WITHDRAW, CHECK, EXIT};
 
 void displayMenu();
 int getMenuOption();
 bool isAlpha(string &str);
 float stringToFloat(string &str);
-void createAccount(BankAccount *bankAccount, string name, float balance);
+void createAccount(BankAccount* &bankAccount, string name, float balance);
 
 
 int main() {
@@ -42,7 +52,7 @@ int main() {
         menuOption = (MenuOptions)(menu_option-1);
         string name = "";
         string amount = "";
-        float balance = -1.0f;
+        float num = -1.0f;
         switch(menuOption) {
             case CREATE:
                 if(!accountCreated) {
@@ -55,13 +65,13 @@ int main() {
                     cout << "Please enter your initial deposit: ";
                     cin >> amount;
 
-                    balance = stringToFloat(amount);
-                    while(balance == -1) {
+                    num = stringToFloat(amount);
+                    while(num == -1) {
                         cin >> amount;
-                        balance = stringToFloat(amount);
+                        num = stringToFloat(amount);
                     }
 
-                    createAccount(bankAccount, name, balance);
+                    createAccount(bankAccount, name, num);
                     cout << "\n\nAccount created successfully!\n\n";
                     accountCreated = true;
                 }
@@ -71,14 +81,54 @@ int main() {
                 break;
 
             case DEPOSIT:
+                if(bankAccount) {
+                    cout << "\n\nPlease enter the deposit amount: ";
+                    cin >> amount;
 
+                    num = stringToFloat(amount);
+                    while(num == -1) {
+                        cin >> amount;
+                        num = stringToFloat(amount);
+                    }
+
+                    bankAccount->deposit(num);
+
+                    cout << "\n\nYour new balance is $" <<  fixed << setprecision(2) << bankAccount->getBalance() << "\n\n";
+
+                }
+                else {
+                    cout << "\n\nBank account is invalid\n\n";
+                }
                 break;
             case WITHDRAW:
+                if(bankAccount) {
+                    cout << "Please enter the deposit amount: ";
+                    cin >> amount;
+
+                    num = stringToFloat(amount);
+                    while(num == -1) {
+                        cin >> amount;
+                        num = stringToFloat(amount);
+                    }
+
+                    bankAccount->withdraw(num);
+
+                    cout << "\n\nYour current balance is $" << fixed << setprecision(2) << bankAccount->getBalance() << "\n\n";
+                }
+                else {
+                    cout << "\n\nBank account is invalid\n\n";
+                }
                 break;
             case CHECK:
+                if(bankAccount) {
+                    cout << "\n\nYour current balance is $" << fixed << setprecision(2) << bankAccount->getBalance() << "\n\n";
+                }
+                break;
+            case EXIT:
+                cout << "\n\nExiting banking program...";
                 break;
         }
-    } while(true);
+    } while(menu_option != 5);
 
     delete bankAccount;
 
@@ -135,6 +185,6 @@ float stringToFloat(string &str) {
     }
 }
 
-void createAccount(BankAccount *bankAccount, string name, float balance) {
+void createAccount(BankAccount* &bankAccount, string name, float balance) {
     bankAccount = new BankAccount(name, balance);
 }
